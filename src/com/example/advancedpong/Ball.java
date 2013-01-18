@@ -31,13 +31,25 @@ public class Ball extends Actor
     	int width = size.x;
     	int height = size.y;
 		
-		if (x <= 0 || x + this.width >= width)
+		if (x <= 0)
 		{
+			x = 0;
+			velocityX *= -1; 
+		}
+		else if (x + this.width >= width)
+		{
+			x = width - this.width;
 			velocityX *= -1; 
 		}
 		
-		if (y <= 0 || y + this.height >= height)
+		if (y <= 0)
 		{
+			y = 0;
+			velocityY *= -1; 
+		}
+		else if (y + this.height >= height)
+		{
+			y = height - this.height;
 			velocityY *= -1; 
 		}
 	}

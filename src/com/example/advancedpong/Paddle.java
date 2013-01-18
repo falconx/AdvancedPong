@@ -11,9 +11,11 @@ public class Paddle extends Actor
 {
 	public enum ScreenSide { LEFT, RIGHT }
 	
+	private final int PADDLE_OUT_DIST = 40; // Percent.
+	
 	boolean isPressed;
 	ScreenSide side;
-	
+
 	public boolean IsPressed()
 	{
 		return this.isPressed;
@@ -45,9 +47,16 @@ public class Paddle extends Actor
     	Point size = new Point();
     	display.getSize(size);
     	int height = size.y;
+    	int width = size.x;
 		
-		if (y <= 0 || y + this.height >= height)
+		if (y <= 0)
 		{
+			y = 0;
+			velocityY *= -1;
+		}
+		else if ((y + this.height) >= height)
+		{
+			y = height - this.height;
 			velocityY *= -1;
 		}
 		
@@ -56,11 +65,17 @@ public class Paddle extends Actor
 		{
 			if (this.side == ScreenSide.LEFT)
 			{
-				this.x += 5;
+				if (this.x <= (width / 100 * PADDLE_OUT_DIST))
+				{
+					this.x += 5;
+				}
 			}
 			else
 			{
-				this.x -= 5;
+				if (this.x >= (width / 100 * (100 - PADDLE_OUT_DIST)))
+				{
+					this.x -= 5;
+				}
 			}
 		}
 	}
