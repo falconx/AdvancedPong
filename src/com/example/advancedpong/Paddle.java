@@ -15,6 +15,8 @@ public class Paddle extends Actor
 	
 	boolean isPressed;
 	ScreenSide side;
+	
+	double prevVelocityY;
 
 	public boolean IsPressed()
 	{
@@ -68,6 +70,12 @@ public class Paddle extends Actor
 				if (this.x <= (width / 100 * PADDLE_OUT_DIST))
 				{
 					this.x += 5;
+					
+					if (this.velocityY != 0)
+					{
+						prevVelocityY = this.velocityY;
+						this.velocityY = 0;
+					}
 				}
 			}
 			else
@@ -75,6 +83,34 @@ public class Paddle extends Actor
 				if (this.x >= (width / 100 * (100 - PADDLE_OUT_DIST)))
 				{
 					this.x -= 5;
+					
+					if (this.velocityY != 0)
+					{
+						prevVelocityY = this.velocityY;
+						this.velocityY = 0;
+					}
+				}
+			}
+		}
+		else
+		{
+			// Move back to original X position.
+			if (this.side == ScreenSide.LEFT && this.x > 0)
+			{
+				this.x -= 5;
+				
+				if (this.x == 0)
+				{
+					this.velocityY = prevVelocityY;
+				}
+			}
+			else if (this.side == ScreenSide.RIGHT && this.x < (width - this.width))
+			{
+				this.x += 5;
+				
+				if (this.x == (width - this.width))
+				{
+					this.velocityY = prevVelocityY;
 				}
 			}
 		}
