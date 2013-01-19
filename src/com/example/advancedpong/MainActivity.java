@@ -1,5 +1,7 @@
 package com.example.advancedpong;
 
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
@@ -7,8 +9,8 @@ import android.os.Bundle;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnTouchListener;
+import android.view.WindowManager;
 
 import com.example.advancedpong.MainView.MainThread;
 
@@ -16,6 +18,9 @@ public class MainActivity extends Activity
 {
     private MainThread mMainThread;
     private MainView mMainView;
+    
+    // Store initial pointer positons.
+    private HashMap<Integer, Float> lastPositionX = new HashMap<Integer, Float>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -40,28 +45,50 @@ public class MainActivity extends Activity
             	display.getSize(size);
             	int width = size.x;
             	
-            	// LHS
-        		if (event.getX() < width / 2 &&
-        			event.getAction() == MotionEvent.ACTION_DOWN)
-        		{
-        			mMainThread.leftPaddle.isPressed = true;
-        		}
-        		else if (event.getAction() == MotionEvent.ACTION_UP)
-        		{
-        			mMainThread.leftPaddle.isPressed = false;
-        		}
-        		
-        		// RHS
-        		if (event.getX() > width / 2 &&
-        			event.getAction() == MotionEvent.ACTION_DOWN)
-        		{
-        			mMainThread.rightPaddle.isPressed = true;
-        		}
-        		else if (event.getAction() == MotionEvent.ACTION_UP)
-        		{
-        			mMainThread.rightPaddle.isPressed = false;
-        		}
-        		
+            	// Detects pointer input. 
+            	for (int i = 0; i < event.getPointerCount(); i++)
+            	{
+            		int action = event.getActionMasked();
+            		int pointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+        			float x = event.getX(pointerIndex);
+        			
+    				if (action == MotionEvent.ACTION_POINTER_UP)
+    				{
+    					float lastPosX = lastPositionX.get(pointerIndex);
+    					
+    					if (lastPosX < width / 2)
+    					{
+    						mMainThread.leftPaddle.isPressed = false;
+    					}
+    					else
+    					{
+    						mMainThread.rightPaddle.isPressed = false;
+    					}
+    				}
+    				else if (action == MotionEvent.ACTION_UP)
+    				{
+    					mMainThread.leftPaddle.isPressed = false;
+    					mMainThread.rightPaddle.isPressed = false;
+    				}
+    					
+    				if (action == MotionEvent.ACTION_POINTER_DOWN || action == MotionEvent.ACTION_DOWN)
+    				{
+        				// LHS
+        				if (x < width / 2)
+        				{
+        					mMainThread.leftPaddle.isPressed = true;
+        				}
+        				
+        				// RHS
+        				else
+        				{
+        					mMainThread.rightPaddle.isPressed = true;
+        				}
+        				
+        				lastPositionX.put(pointerIndex, x);
+    				}
+            	}
+            	
         		return true;
         	}
         });
