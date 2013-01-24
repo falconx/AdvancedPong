@@ -11,6 +11,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.example.advancedpong.MainView.MainThread;
 
@@ -34,6 +36,29 @@ public class MainActivity extends Activity
         mMainView = (MainView) findViewById(R.id.main);
         mMainThread = mMainView.getThread();
         
+        // Draw player one score.
+        TextView t = new TextView(this);
+        int score = GameManager.Game.getPlayerAtIndex(1).getScore();
+        t.setText(Integer.toString(score));
+        t.setTop(100);
+        t.setLeft(100);
+        t.setTextSize(300);
+        
+        RelativeLayout l = (RelativeLayout) findViewById(R.id.layout);
+        l.addView(t);
+        
+        // Draw player two score.
+        t = new TextView(this);
+        score = GameManager.Game.getPlayerAtIndex(2).getScore();
+        t.setText(Integer.toString(score));
+        t.setTop(100);
+        t.setLeft(300);
+        t.setTextSize(300);
+        
+        l = (RelativeLayout) findViewById(R.id.layout);
+        l.addView(t);
+        
+		// Detect touch input.
         mMainView.setOnTouchListener(new OnTouchListener()
         {
         	public boolean onTouch(View v, MotionEvent event)
