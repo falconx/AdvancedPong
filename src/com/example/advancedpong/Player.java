@@ -1,5 +1,6 @@
 package com.example.advancedpong;
 
+
 public class Player
 {
 	private int playerIndex;
@@ -17,7 +18,7 @@ public class Player
 
 	public void addScore()
 	{
-		this.score++;
+		this.addScore(1);
 	}
 	
 	public void addScore(int score)

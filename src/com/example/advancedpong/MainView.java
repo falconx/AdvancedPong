@@ -6,13 +6,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Handler;
-import android.text.Layout;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.example.advancedpong.Paddle.ScreenSide;
 
@@ -47,7 +45,7 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
         	int height = size.y;
         	int width = size.x;
             
-            ball = new Ball(resources, 100, 100, 300, 100);
+            ball = new Ball(resources, 100, 100, -2500, 100);
             leftPaddle = new Paddle(resources, ScreenSide.LEFT, 0, height / 2 - 50, 0, 250);
             rightPaddle = new Paddle(resources, ScreenSide.RIGHT, 0, height / 2 - 50, 0, -250);
             rightPaddle.x = width - rightPaddle.width;

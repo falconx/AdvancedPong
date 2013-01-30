@@ -1,11 +1,7 @@
 package com.example.advancedpong;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Point;
-import android.view.Display;
-import android.view.WindowManager;
 
 public class Ball extends Actor
 {
@@ -23,34 +19,50 @@ public class Ball extends Actor
 	{
 		super.Update(timeElapsed);
 		
-		Context context = MainApplication.getContext();
-		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-    	Point size = new Point();
-    	display.getSize(size);
-    	int width = size.x;
-    	int height = size.y;
-		
 		if (x <= 0)
 		{
 			x = 0;
-			velocityX *= -1; 
+			velocityX *= -1;
+			
+			// Awards player two a point.
+			GameManager.Game.getPlayerAtIndex(2).addScore();
+			
+			// Update score display.
+			runOnUiThread(new Runnable() {
+				public void run() {
+					GameManager.PlayerTwoScore.setText(Integer.toString(GameManager.Game.getPlayerAtIndex(2).getScore()));
+					GameManager.PlayerTwoScore.measure(0, 0);
+			        GameManager.PlayerTwoScore.setX((GameManager.SCREEN_WIDTH / 4) * 3 - GameManager.PlayerTwoScore.getMeasuredWidth() / 2);
+			    }
+			});
 		}
-		else if (x + this.width >= width)
+		else if (x + this.width >= GameManager.SCREEN_WIDTH)
 		{
-			x = width - this.width;
-			velocityX *= -1; 
+			x = GameManager.SCREEN_WIDTH - this.width;
+			velocityX *= -1;
+			
+			// Awards player one a point.
+			GameManager.Game.getPlayerAtIndex(1).addScore();
+			
+			// Update score display.
+			runOnUiThread(new Runnable() {
+				public void run() {
+					GameManager.PlayerOneScore.setText(Integer.toString(GameManager.Game.getPlayerAtIndex(1).getScore()));
+					GameManager.PlayerOneScore.measure(0, 0);
+			        GameManager.PlayerOneScore.setX(GameManager.SCREEN_WIDTH / 4 - GameManager.PlayerOneScore.getMeasuredWidth() / 2);
+			    }
+			});
 		}
 		
 		if (y <= 0)
 		{
 			y = 0;
-			velocityY *= -1; 
+			velocityY *= -1;
 		}
-		else if (y + this.height >= height)
+		else if (y + this.height >= GameManager.SCREEN_HEIGHT)
 		{
-			y = height - this.height;
-			velocityY *= -1; 
+			y = GameManager.SCREEN_HEIGHT - this.height;
+			velocityY *= -1;
 		}
 	}
 }

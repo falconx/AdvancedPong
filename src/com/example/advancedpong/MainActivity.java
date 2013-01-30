@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.text.Layout;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,7 +24,7 @@ public class MainActivity extends Activity
     
     // Store initial pointer positons.
     private HashMap<Integer, Float> lastPositionX = new HashMap<Integer, Float>();
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -36,27 +37,29 @@ public class MainActivity extends Activity
         mMainView = (MainView) findViewById(R.id.main);
         mMainThread = mMainView.getThread();
         
-        // Draw player one score.
-        TextView t = new TextView(this);
-        int score = GameManager.Game.getPlayerAtIndex(1).getScore();
-        t.setText(Integer.toString(score));
-        t.setTop(100);
-        t.setLeft(100);
-        t.setTextSize(300);
-        
+        // Add player scores.
         RelativeLayout l = (RelativeLayout) findViewById(R.id.layout);
-        l.addView(t);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         
-        // Draw player two score.
-        t = new TextView(this);
-        score = GameManager.Game.getPlayerAtIndex(2).getScore();
-        t.setText(Integer.toString(score));
-        t.setTop(100);
-        t.setLeft(300);
-        t.setTextSize(300);
+        GameManager.PlayerOneScore = new TextView(this);
+        GameManager.PlayerOneScore.setText(Integer.toString(GameManager.Game.getPlayerAtIndex(1).getScore()));
+        GameManager.PlayerOneScore.setTextSize(300);
+        GameManager.PlayerOneScore.setLayoutParams(params);
+        GameManager.PlayerOneScore.measure(0, 0);
+        GameManager.PlayerOneScore.setX(GameManager.SCREEN_WIDTH / 4 - GameManager.PlayerOneScore.getMeasuredWidth() / 2);
+        GameManager.PlayerOneScore.setY(GameManager.SCREEN_HEIGHT / 2 - GameManager.PlayerOneScore.getMeasuredHeight() / 2);
+        l.addView(GameManager.PlayerOneScore);
         
-        l = (RelativeLayout) findViewById(R.id.layout);
-        l.addView(t);
+        GameManager.PlayerTwoScore = new TextView(this);
+        GameManager.PlayerTwoScore.setText(Integer.toString(GameManager.Game.getPlayerAtIndex(2).getScore()));
+        GameManager.PlayerTwoScore.setTextSize(300);
+        GameManager.PlayerTwoScore.setLayoutParams(params);
+        GameManager.PlayerTwoScore.measure(0, 0);
+        GameManager.PlayerTwoScore.setX((GameManager.SCREEN_WIDTH / 4) * 3 - GameManager.PlayerTwoScore.getMeasuredWidth() / 2);
+        GameManager.PlayerTwoScore.setY(GameManager.SCREEN_HEIGHT / 2 - GameManager.PlayerTwoScore.getMeasuredHeight() / 2);
+        l.addView(GameManager.PlayerTwoScore);
+        
+        //TODO: Update TextView after score is added.
         
 		// Detect touch input.
         mMainView.setOnTouchListener(new OnTouchListener()

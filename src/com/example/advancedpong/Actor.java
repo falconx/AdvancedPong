@@ -1,11 +1,12 @@
 package com.example.advancedpong;
 
+import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 
-public abstract class Actor
+public class Actor extends Activity
 {
 	protected float x;
 	protected float y;

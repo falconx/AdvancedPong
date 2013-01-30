@@ -1,11 +1,7 @@
 package com.example.advancedpong;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Point;
-import android.view.Display;
-import android.view.WindowManager;
 
 public class Paddle extends Actor
 {
@@ -43,22 +39,14 @@ public class Paddle extends Actor
 	{
 		super.Update(timeElapsed);
 		
-		Context context = MainApplication.getContext();
-		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-    	Point size = new Point();
-    	display.getSize(size);
-    	int height = size.y;
-    	int width = size.x;
-		
 		if (y <= 0)
 		{
 			y = 0;
 			velocityY *= -1;
 		}
-		else if ((y + this.height) >= height)
+		else if ((y + this.height) >= GameManager.SCREEN_HEIGHT)
 		{
-			y = height - this.height;
+			y = GameManager.SCREEN_HEIGHT - this.height;
 			velocityY *= -1;
 		}
 		
@@ -67,7 +55,7 @@ public class Paddle extends Actor
 		{
 			if (this.side == ScreenSide.LEFT)
 			{
-				if (this.x <= (width / 100 * PADDLE_OUT_DIST))
+				if (this.x <= (GameManager.SCREEN_WIDTH / 100 * PADDLE_OUT_DIST))
 				{
 					this.x += 5;
 					
@@ -80,7 +68,7 @@ public class Paddle extends Actor
 			}
 			else
 			{
-				if (this.x >= (width / 100 * (100 - PADDLE_OUT_DIST)))
+				if (this.x >= (GameManager.SCREEN_WIDTH / 100 * (100 - PADDLE_OUT_DIST)))
 				{
 					this.x -= 5;
 					
@@ -104,11 +92,11 @@ public class Paddle extends Actor
 					this.velocityY = prevVelocityY;
 				}
 			}
-			else if (this.side == ScreenSide.RIGHT && this.x < (width - this.width))
+			else if (this.side == ScreenSide.RIGHT && this.x < (GameManager.SCREEN_WIDTH - this.width))
 			{
 				this.x += 5;
 				
-				if (this.x == (width - this.width))
+				if (this.x == (GameManager.SCREEN_WIDTH - this.width))
 				{
 					this.velocityY = prevVelocityY;
 				}
