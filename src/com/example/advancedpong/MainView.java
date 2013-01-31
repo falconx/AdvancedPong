@@ -4,9 +4,13 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.os.Handler;
+import android.provider.CalendarContract.Colors;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -45,7 +49,8 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
         	int height = size.y;
         	int width = size.x;
             
-            ball = new Ball(resources, 100, 100, -2500, 100);
+            //ball = new Ball(resources, 100, 100, 250, 100);
+        	ball = new Ball(resources, GameManager.SCREEN_WIDTH - 10, GameManager.SCREEN_HEIGHT - 50, 0, 50);
             leftPaddle = new Paddle(resources, ScreenSide.LEFT, 0, height / 2 - 50, 0, 250);
             rightPaddle = new Paddle(resources, ScreenSide.RIGHT, 0, height / 2 - 50, 0, -250);
             rightPaddle.x = width - rightPaddle.width;
@@ -60,7 +65,7 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
             {
                 mLastTime = System.currentTimeMillis() + 100;
             }
-        }        
+        }
 
         @Override
         public void run()
@@ -75,8 +80,12 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
                     
                     synchronized (mSurfaceHolder)
                     {
+                    	doDraw(c);
                         updatePhysics();
-                        doDraw(c);
+                        checkCollision();
+                        
+                        //Log.d("VX", Double.toString(rightPaddle.velocityX));
+                        //Log.d("PX", Double.toString(rightPaddle.x));
                     }
                 }
                 finally
@@ -96,12 +105,43 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
         {
             mRun = b;
         }
+        
+        Path p = new Path();
 
         private void doDraw(Canvas canvas)
         {
-        	ball.Draw(canvas);
+        	// Draw balls.
+            for (Ball ball : GameManager.Game.balls)
+            {
+            	ball.Draw(canvas);
+            }
+        	
         	leftPaddle.Draw(canvas);
         	rightPaddle.Draw(canvas);
+        	
+        	// Temp: PATHS //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        	/*
+        	if (!GameManager.Game.balls.isEmpty())
+        	{
+	        	for (Ball ball : GameManager.Game.balls)
+	            {
+	        		Path newPath = new Path();
+	        		newPath.moveTo(ball.lastX, ball.lastY);
+	        		newPath.lineTo(ball.x, ball.y);
+	        		p.addPath(newPath);
+	            }
+	        	
+	        	Paint paint = new Paint();
+	        	paint.setDither(true);
+	        	paint.setColor(Color.RED);
+	        	paint.setStyle(Paint.Style.STROKE);    
+	        	paint.setStrokeJoin(Paint.Join.ROUND);
+	        	paint.setStrokeCap(Paint.Cap.ROUND);
+	        	paint.setStrokeWidth(3);
+	        	
+	        	canvas.drawPath(p, paint);
+        	}
+        	*/
         }
 
         private void updatePhysics()
@@ -115,11 +155,106 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
 
             double elapsed = (now - mLastTime) / 1000.0;
             
-            ball.Update(elapsed);
+            // Update balls.
+            for (Ball ball : GameManager.Game.balls)
+            {
+            	ball.Update(elapsed);
+            }
+            
             leftPaddle.Update(elapsed);
             rightPaddle.Update(elapsed);
             
             mLastTime = now;
+        }
+        
+        private void checkCollision()
+        {
+        	checkBallToPaddleCollision();
+        }
+        
+        private void checkBallToPaddleCollision()
+        {
+        	// TEMP:
+        	int CORNER_SIZE = 10;
+        	
+        	for (Ball ball : GameManager.Game.balls)
+        	{
+        		for (Paddle paddle : GameManager.Game.paddles)
+        		{
+        			if (paddle.Side() == ScreenSide.LEFT)
+        			{
+        				//
+        			}
+        			else
+        			{
+        				// Hit side of RHS paddle.
+        				if (((ball.bottom()) > paddle.y) && (ball.y < paddle.bottom()) && (ball.right() >= paddle.x) && (ball.x <= paddle.right()))
+        				{
+        					if ((ball.bottom() >= paddle.y) && (ball.bottom() <= paddle.y + CORNER_SIZE))
+        					{
+        						// Hit Top.
+        						
+        						// Set ball y to top of paddle.
+        						ball.y = paddle.y - ball.height;
+        						
+        						// Force paddle to move downwards.
+        						paddle.velocityY = Math.abs(paddle.velocityY);
+        						
+        						if (Math.abs(ball.velocityY) <= Math.abs(paddle.velocityY))
+        						{
+        							ball.velocityY = paddle.velocityY + 150;
+        						}
+        						
+        						ball.velocityY *= -1;
+        					}
+        					else if ((ball.y <= paddle.bottom()) && (ball.y >= paddle.bottom() - CORNER_SIZE))
+        					{
+        						// Hit Bottom.
+        						
+        						// Set ball y to top of paddle.
+        						ball.y = paddle.bottom();
+        						
+        						// Force paddle to move downwards.
+        						paddle.velocityY = -Math.abs(paddle.velocityY);
+        						
+        						if (Math.abs(ball.velocityY) <= Math.abs(paddle.velocityY))
+        						{
+        							ball.velocityY = -(Math.abs(paddle.velocityY) + 150);
+        						}
+        						
+        						ball.velocityY *= -1;
+        					}
+        					else if ((ball.x >= paddle.x + (paddle.width / 2)) && (ball.x <= paddle.right()))
+        					{
+        						// Hit RHS.
+        						
+        						// Set ball x to RHS of paddle.
+        						ball.x = paddle.right();
+        						
+        						// Ensure ball.x speed is greater than paddle.x return speed.
+        						if (Math.abs(ball.velocityX) < Math.abs(paddle.velocityX))
+        						{
+        							ball.velocityX = Math.abs(paddle.velocityX + 2);
+        						}
+        					}
+        					else
+        					{
+        						// Hit LHS.
+        						
+        						// Set ball x to LHS of paddle.
+        						ball.x = paddle.x - ball.width;
+        						
+        						if (Math.abs(ball.velocityX) < Math.abs(paddle.velocityX))
+        						{
+        							ball.velocityX = -Math.abs(paddle.velocityX + 2);
+        						}
+        					}
+        					
+        					paddle.forceBack();
+        				}
+        			}
+        		}
+        	}
         }
     }
 

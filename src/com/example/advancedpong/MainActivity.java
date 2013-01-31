@@ -38,28 +38,7 @@ public class MainActivity extends Activity
         mMainThread = mMainView.getThread();
         
         // Add player scores.
-        RelativeLayout l = (RelativeLayout) findViewById(R.id.layout);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        
-        GameManager.PlayerOneScore = new TextView(this);
-        GameManager.PlayerOneScore.setText(Integer.toString(GameManager.Game.getPlayerAtIndex(1).getScore()));
-        GameManager.PlayerOneScore.setTextSize(300);
-        GameManager.PlayerOneScore.setLayoutParams(params);
-        GameManager.PlayerOneScore.measure(0, 0);
-        GameManager.PlayerOneScore.setX(GameManager.SCREEN_WIDTH / 4 - GameManager.PlayerOneScore.getMeasuredWidth() / 2);
-        GameManager.PlayerOneScore.setY(GameManager.SCREEN_HEIGHT / 2 - GameManager.PlayerOneScore.getMeasuredHeight() / 2);
-        l.addView(GameManager.PlayerOneScore);
-        
-        GameManager.PlayerTwoScore = new TextView(this);
-        GameManager.PlayerTwoScore.setText(Integer.toString(GameManager.Game.getPlayerAtIndex(2).getScore()));
-        GameManager.PlayerTwoScore.setTextSize(300);
-        GameManager.PlayerTwoScore.setLayoutParams(params);
-        GameManager.PlayerTwoScore.measure(0, 0);
-        GameManager.PlayerTwoScore.setX((GameManager.SCREEN_WIDTH / 4) * 3 - GameManager.PlayerTwoScore.getMeasuredWidth() / 2);
-        GameManager.PlayerTwoScore.setY(GameManager.SCREEN_HEIGHT / 2 - GameManager.PlayerTwoScore.getMeasuredHeight() / 2);
-        l.addView(GameManager.PlayerTwoScore);
-        
-        //TODO: Update TextView after score is added.
+        addPlayerScores();
         
 		// Detect touch input.
         mMainView.setOnTouchListener(new OnTouchListener()
@@ -86,17 +65,17 @@ public class MainActivity extends Activity
     					
     					if (lastPosX < width / 2)
     					{
-    						mMainThread.leftPaddle.isPressed = false;
+    						mMainThread.leftPaddle.setIsPressed(false);
     					}
     					else
     					{
-    						mMainThread.rightPaddle.isPressed = false;
+    						mMainThread.rightPaddle.setIsPressed(false);
     					}
     				}
     				else if (action == MotionEvent.ACTION_UP)
     				{
-    					mMainThread.leftPaddle.isPressed = false;
-    					mMainThread.rightPaddle.isPressed = false;
+    					mMainThread.leftPaddle.setIsPressed(false);
+    					mMainThread.rightPaddle.setIsPressed(false);
     				}
     					
     				if (action == MotionEvent.ACTION_POINTER_DOWN || action == MotionEvent.ACTION_DOWN)
@@ -104,13 +83,13 @@ public class MainActivity extends Activity
         				// LHS
         				if (x < width / 2)
         				{
-        					mMainThread.leftPaddle.isPressed = true;
+        					mMainThread.leftPaddle.setIsPressed(true);
         				}
         				
         				// RHS
         				else
         				{
-        					mMainThread.rightPaddle.isPressed = true;
+        					mMainThread.rightPaddle.setIsPressed(true);
         				}
         				
         				lastPositionX.put(pointerIndex, x);
@@ -126,5 +105,31 @@ public class MainActivity extends Activity
         
         // start thread
         mMainThread.doStart();
+    }
+    
+    private void addPlayerScores()
+    {
+    	RelativeLayout l = (RelativeLayout) findViewById(R.id.layout);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        
+        GameManager.PlayerOneScore = new TextView(this);
+        GameManager.PlayerOneScore.setText(Integer.toString(GameManager.Game.getPlayerAtIndex(1).getScore()));
+        GameManager.PlayerOneScore.setTextSize(300);
+        GameManager.PlayerOneScore.setLayoutParams(params);
+        GameManager.PlayerOneScore.measure(0, 0);
+        GameManager.PlayerOneScore.setX(GameManager.SCREEN_WIDTH / 4 - GameManager.PlayerOneScore.getMeasuredWidth() / 2);
+        GameManager.PlayerOneScore.setY(GameManager.SCREEN_HEIGHT / 2 - GameManager.PlayerOneScore.getMeasuredHeight() / 2);
+        GameManager.PlayerOneScore.setAlpha(200);
+        l.addView(GameManager.PlayerOneScore);
+        
+        GameManager.PlayerTwoScore = new TextView(this);
+        GameManager.PlayerTwoScore.setText(Integer.toString(GameManager.Game.getPlayerAtIndex(2).getScore()));
+        GameManager.PlayerTwoScore.setTextSize(300);
+        GameManager.PlayerTwoScore.setLayoutParams(params);
+        GameManager.PlayerTwoScore.measure(0, 0);
+        GameManager.PlayerTwoScore.setX((GameManager.SCREEN_WIDTH / 4) * 3 - GameManager.PlayerTwoScore.getMeasuredWidth() / 2);
+        GameManager.PlayerTwoScore.setY(GameManager.SCREEN_HEIGHT / 2 - GameManager.PlayerTwoScore.getMeasuredHeight() / 2);
+        GameManager.PlayerTwoScore.setAlpha(200);
+        l.addView(GameManager.PlayerTwoScore);
     }
 }

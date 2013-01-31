@@ -7,11 +7,17 @@ public class Game
 {
 	private List<Player> players;
 	
+	public List<Ball> balls;
+	public List<Paddle> paddles;
+	
 	public Game()
 	{
 		this.players = new ArrayList<Player>();
 		this.players.add(new Player(1));
 		this.players.add(new Player(2));
+		
+		this.balls = new ArrayList<Ball>();
+		this.paddles = new ArrayList<Paddle>();
 	}
 	
 	/**

@@ -8,6 +8,8 @@ public class Ball extends Actor
 	public Ball(Resources resources, float x, float y, double velocityX, double velocityY)
 	{
 		super(resources, R.drawable.ball, x, y, velocityX, velocityY);
+		
+		GameManager.Game.balls.add(this);
 	}
 	
 	public void Draw(Canvas canvas)
@@ -19,11 +21,8 @@ public class Ball extends Actor
 	{
 		super.Update(timeElapsed);
 		
-		if (x <= 0)
+		if (x + this.width < 0)
 		{
-			x = 0;
-			velocityX *= -1;
-			
 			// Awards player two a point.
 			GameManager.Game.getPlayerAtIndex(2).addScore();
 			
@@ -35,12 +34,12 @@ public class Ball extends Actor
 			        GameManager.PlayerTwoScore.setX((GameManager.SCREEN_WIDTH / 4) * 3 - GameManager.PlayerTwoScore.getMeasuredWidth() / 2);
 			    }
 			});
-		}
-		else if (x + this.width >= GameManager.SCREEN_WIDTH)
-		{
-			x = GameManager.SCREEN_WIDTH - this.width;
-			velocityX *= -1;
 			
+			// Destroy ball.
+			GameManager.Game.balls.remove(this);
+		}
+		else if (x > GameManager.SCREEN_WIDTH)
+		{
 			// Awards player one a point.
 			GameManager.Game.getPlayerAtIndex(1).addScore();
 			
@@ -52,6 +51,9 @@ public class Ball extends Actor
 			        GameManager.PlayerOneScore.setX(GameManager.SCREEN_WIDTH / 4 - GameManager.PlayerOneScore.getMeasuredWidth() / 2);
 			    }
 			});
+			
+			// Destroy ball.
+			GameManager.Game.balls.remove(this);
 		}
 		
 		if (y <= 0)

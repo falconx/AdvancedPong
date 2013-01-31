@@ -10,6 +10,8 @@ public class Actor extends Activity
 {
 	protected float x;
 	protected float y;
+	protected float lastX;
+	protected float lastY;
 	protected double velocityX;
 	protected double velocityY;
 	protected int height;
@@ -34,6 +36,26 @@ public class Actor extends Activity
 	public void setY(float y)
 	{
 		this.y = y;
+	}
+	
+	public float getLastX()
+	{
+		return this.lastX;
+	}
+	
+	public void setLastX(float x)
+	{
+		this.lastX = x;
+	}
+	
+	public float getLastY()
+	{
+		return this.lastY;
+	}
+	
+	public void setLastY(float y)
+	{
+		this.lastY = y;
 	}
 	
 	public double getVelocityX()
@@ -90,6 +112,8 @@ public class Actor extends Activity
 	{
 		this.x = x;
 		this.y = y;
+		this.lastX = x;
+		this.lastY = y;
 		this.velocityX = velocityX;
 		this.velocityY = velocityY;
 		this.bitmap = BitmapFactory.decodeResource(resources, resourceID);
@@ -104,6 +128,9 @@ public class Actor extends Activity
 	
 	protected void Update(double timeElapsed)
 	{
+		this.lastX = this.x;
+		this.lastY = this.y;
+		
 		this.x += timeElapsed * this.velocityX;
 		this.y += timeElapsed * this.velocityY;
 	}
