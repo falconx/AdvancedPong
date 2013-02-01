@@ -23,6 +23,12 @@ public class Ball extends Actor
 		
 		if (x + this.width < 0)
 		{
+			// TEMP:
+			this.x = 0;
+			this.velocityX *= -1;
+			
+			
+			
 			// Awards player two a point.
 			GameManager.Game.getPlayerAtIndex(2).addScore();
 			
@@ -36,10 +42,16 @@ public class Ball extends Actor
 			});
 			
 			// Destroy ball.
-			GameManager.Game.balls.remove(this);
+			//GameManager.Game.balls.remove(this); //////////////////////////////////////////////////////////
 		}
 		else if (x > GameManager.SCREEN_WIDTH)
 		{
+			// TEMP:
+			this.x = GameManager.SCREEN_WIDTH - this.width;
+			this.velocityX *= -1;
+			
+			
+			
 			// Awards player one a point.
 			GameManager.Game.getPlayerAtIndex(1).addScore();
 			
@@ -53,7 +65,7 @@ public class Ball extends Actor
 			});
 			
 			// Destroy ball.
-			GameManager.Game.balls.remove(this);
+			//GameManager.Game.balls.remove(this); //////////////////////////////////////////////////////////
 		}
 		
 		if (y <= 0)
