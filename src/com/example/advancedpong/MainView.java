@@ -6,13 +6,25 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Region;
+import android.graphics.PointF;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.example.advancedpong.Paddle.ScreenSide;
+
+class Line
+{
+	public PointF a, b;
+	
+	public Line(PointF a, PointF b)
+	{
+		this.a = a;
+		this.b = b;
+	}
+}
 
 class MainView extends SurfaceView implements SurfaceHolder.Callback
 {
@@ -153,6 +165,37 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
             mLastTime = now;
         }
         
+        private PointF findLineIntersection(PointF start1, PointF end1, PointF start2, PointF end2)
+        {
+        	float denom = ((end1.x - start1.x) * (end2.y - start2.y)) - ((end1.y - start1.y) * (end2.x - start2.x));
+
+        	//  AB & CD are parallel 
+        	if (denom == 0)
+        	{
+        		return new PointF(0, 0);
+        	}
+
+        	float numer = ((start1.y - start2.y) * (end2.x - start2.x)) - ((start1.x - start2.x) * (end2.y - start2.y));
+
+        	float r = numer / denom;
+
+        	float numer2 = ((start1.y - start2.y) * (end1.x - start1.x)) - ((start1.x - start2.x) * (end1.y - start1.y));
+
+        	float s = numer2 / denom;
+
+            if ((r < 0 || r > 1) || (s < 0 || s > 1))
+            {
+        		return new PointF(0, 0);
+            }
+
+        	// Find intersection point
+        	PointF result = new PointF();
+        	result.x = start1.x + (r * (end1.x - start1.x));
+        	result.y = start1.y + (r * (end1.y - start1.y));
+
+        	return result;
+         }
+        
         private void checkCollision(Canvas canvas)
         {
         	Paint paint = new Paint();
@@ -168,61 +211,57 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
         		for (Paddle paddle : GameManager.Game.paddles)
         		{
         			Path[] paths = new Path[4];
-            		
+        			Line[] lines = new Line[4];
+        			
             		// L
             		Path p = new Path();
             		p.moveTo(paddle.x, paddle.y);
     	        	p.lineTo(paddle.x, paddle.bottom());
             		paths[0] = p;
+            		lines[0] = new Line(new PointF(paddle.x, paddle.y), new PointF(paddle.x, paddle.bottom()));
             		
             		// T
             		p = new Path();
             		p.moveTo(paddle.x, paddle.y);
     	        	p.lineTo(paddle.right(), paddle.y);
             		paths[1] = p;
+            		lines[1] = new Line(new PointF(paddle.x, paddle.y), new PointF(paddle.right(), paddle.y));
             		
             		// R
             		p = new Path();
             		p.moveTo(paddle.right(), paddle.y);
     	        	p.lineTo(paddle.right(), paddle.bottom());
             		paths[2] = p;
+            		lines[2] = new Line(new PointF(paddle.right(), paddle.y), new PointF(paddle.right(), paddle.bottom()));
             		
             		// B
             		p = new Path();
             		p.moveTo(paddle.x, paddle.bottom());
     	        	p.lineTo(paddle.right(), paddle.bottom());
             		paths[3] = p;
+            		lines[3] = new Line(new PointF(paddle.x, paddle.bottom()), new PointF(paddle.right(), paddle.bottom()));
+            		
+            		Path bpath = new Path();
+            		bpath.moveTo(ball.lastX, ball.lastY);
+            		bpath.lineTo(ball.x, ball.y);
+            		canvas.drawPath(bpath, paint);
 		        	
-		        	Path path1 = new Path();
-		        	//path1.moveTo(ball.lastX, ball.lastY);
-		        	//path1.lineTo(ball.x, ball.y);
-		        	path1.addCircle(20, 50, 20, Path.Direction.CW);
-		        	canvas.drawPath(path1, paint);
-		        	
+		        	int i = 0;
             		for (Path path : paths)
             		{
 			        	canvas.drawPath(path, paint);
-
-			        	//Region clip = new Region(0, 0, GameManager.SCREEN_WIDTH, GameManager.SCREEN_HEIGHT);
 			        	
-			        	Region region1 = new Region();
-			        	region1.setPath(path1, new Region(20, 50, 40, 40));
+			        	PointF intersect = findLineIntersection(
+			        		new PointF((float)ball.lastX, (float)ball.lastY),
+			        		new PointF((float)ball.x, (float)ball.y),
+			        		lines[i].a, lines[i].b);
 			        	
-			        	Region region2 = new Region();
-			        	region2.setPath(path, new Region((int)paddle.x, (int)paddle.y, paddle.right(), paddle.bottom()));
-			
-			        	//if(p1.quickReject(p2)) // checks for intersection
-			        	//if (!region1.quickReject(region2) && region1.op(region2, Region.Op.INTERSECT))
-			        	if (region1.op(region2, Region.Op.INTERSECT))
+			        	if (intersect.x != 0 && intersect.y != 0)
 			        	{
-			        	    // Collision.
-			        		GameManager.PlayerOneScore.setText("x");
-			        		
-			        		Path temp = new Path();
-			        		temp.moveTo(100, 100);
-				        	temp.lineTo(500, 100);
-				        	canvas.drawPath(temp, paint);
+			        		Log.d("Intersect", Float.toString(intersect.x) + ", " + Float.toString(intersect.y));
 			        	}
+			        	
+			        	i++;
             		}
         		}
         	}
