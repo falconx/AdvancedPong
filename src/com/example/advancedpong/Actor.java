@@ -5,77 +5,60 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Point;
 
 public class Actor extends Activity
 {
-	protected float x;
-	protected float y;
-	protected float lastX;
-	protected float lastY;
-	protected double velocityX;
-	protected double velocityY;
+	protected Point position;
+	protected Point lastPosition;
+	protected float speed;
 	protected int height;
 	protected int width;
 	protected Bitmap bitmap;
 	
 	public float getX()
 	{
-		return this.x;
+		return this.position.x;
 	}
 	
-	public void setX(float x)
+	public void setX(int x)
 	{
-		this.x = x;
+		this.position.set(x, this.position.y);
 	}
 	
 	public float getY()
 	{
-		return this.y;
+		return this.position.y;
 	}
 
-	public void setY(float y)
+	public void setY(int y)
 	{
-		this.y = y;
+		this.position.set(this.position.x, y);
 	}
 	
-	public float getLastX()
+	public int getLastX()
 	{
-		return this.lastX;
+		return this.lastPosition.x;
 	}
 	
-	public void setLastX(float x)
+	public void setLastPosition(int x, int y)
 	{
-		this.lastX = x;
+		this.lastPosition = new Point(x, y);
 	}
 	
-	public float getLastY()
+	public void setLastPosition(Point position)
 	{
-		return this.lastY;
+		this.lastPosition = new Point(position);
 	}
 	
-	public void setLastY(float y)
+	public float getSpeed()
 	{
-		this.lastY = y;
-	}
-	
-	public double getVelocityX()
-	{
-		return this.velocityX;
+		return this.speed;
 	}
 
-	public void setVelocityX(double velocityX)
+	public void setSpeed(float speed)
 	{
-		this.velocityX = velocityX;
-	}
-	
-	public double getVelocityY()
-	{
-		return this.velocityY;
-	}
-	
-	public void setVelocityY(double velocityY)
-	{
-		this.velocityY = velocityY;
+		this.speed = speed;
 	}
 	
 	public Bitmap getBitmap()
@@ -90,32 +73,31 @@ public class Actor extends Activity
 	
 	public int left()
 	{
-		return (int) this.x;
+		return (int) this.position.x;
 	}
 	
 	public int right()
 	{
-		return (int) this.x + this.width;
+		return (int) this.position.x + this.width;
 	}
 	
 	public int top()
 	{
-		return (int) this.y;
+		return (int) this.position.y;
 	}
 	
 	public int bottom()
 	{
-		return (int) this.y + this.height;
+		return (int) this.position.y + this.height;
 	}
 	
-	public Actor(Resources resources, int resourceID, float x, float y, double velocityX, double velocityY)
+	public float angle; /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public Actor(Resources resources, int resourceID, Point position, float speed, float angle)
 	{
-		this.x = x;
-		this.y = y;
-		this.lastX = x;
-		this.lastY = y;
-		this.velocityX = velocityX;
-		this.velocityY = velocityY;
+		this.position = position;
+		this.speed = speed;
+		this.angle = angle;
 		this.bitmap = BitmapFactory.decodeResource(resources, resourceID);
 		this.height = bitmap.getHeight();
 		this.width = bitmap.getWidth();
@@ -123,15 +105,20 @@ public class Actor extends Activity
 	
 	protected void Draw(Canvas canvas)
 	{
-		canvas.drawBitmap(this.bitmap, this.x, this.y, null);
+		canvas.drawBitmap(this.bitmap, this.position.x, this.position.y, null);
 	}
+	
+	public float direction = 270;
 	
 	protected void Update(double timeElapsed)
 	{
-		this.lastX = this.x;
-		this.lastY = this.y;
+		this.lastPosition = this.position;
 		
-		this.x += timeElapsed * this.velocityX;
-		this.y += timeElapsed * this.velocityY;
+		double radians = (Math.PI / 180) * this.angle;
+		this.position.x += this.speed * Math.cos(radians);
+		this.position.y += this.speed * Math.sin(radians);
+		
+		//this.x += timeElapsed * this.speedX;
+		//this.y += timeElapsed * this.speedY;
 	}
 }

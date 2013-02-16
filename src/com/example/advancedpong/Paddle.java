@@ -2,6 +2,7 @@ package com.example.advancedpong;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Point;
 
 public class Paddle extends Actor
 {
@@ -13,7 +14,7 @@ public class Paddle extends Actor
 	private boolean isPressed;
 	private ScreenSide side;
 	
-	double prevVelocityY;
+	double prevSpeedY;
 
 	public boolean getIsPressed()
 	{
@@ -40,9 +41,9 @@ public class Paddle extends Actor
 		this.isForcedBack = true;
 	}
 	
-	public Paddle(Resources resources, ScreenSide side, float x, float y, double velocityX, double velocityY)
+	public Paddle(Resources resources, ScreenSide side, Point position, float speed)
 	{
-		super(resources, R.drawable.paddle, x, y, velocityX, velocityY);
+		super(resources, R.drawable.paddle, position, speed, 90);
 		this.side = side;
 		this.isForcedBack = false;
 		
@@ -58,15 +59,19 @@ public class Paddle extends Actor
 	{
 		super.Update(timeElapsed);
 		
-		if (y <= 0)
+		if (this.position.x <= 0)
 		{
-			y = 0;
-			velocityY *= -1;
+			this.position.y = 0;
+			//this.speed *= -1;
+			
+			this.direction = (this.direction == 90) ? 270 : 90;
 		}
-		else if ((y + this.height) >= GameManager.SCREEN_HEIGHT)
+		else if ((this.position.y + this.height) >= GameManager.SCREEN_HEIGHT)
 		{
-			y = GameManager.SCREEN_HEIGHT - this.height;
-			velocityY *= -1;
+			this.position.y = GameManager.SCREEN_HEIGHT - this.height;
+			//this.speed *= -1;
+			
+			this.direction = (this.direction == 90) ? 270 : 90;
 		}
 		
 		// Move X
@@ -75,24 +80,24 @@ public class Paddle extends Actor
 			// Force backwards to start x point.
 			if (this.side == ScreenSide.LEFT)
 			{
-				if (this.x == 0)
+				if (this.position.x == 0)
 				{
 					this.isForcedBack = false;
 				}
 				else
 				{
-					this.velocityX = -Math.abs(this.velocityX);
+					this.speed = -Math.abs(this.speed);
 				}
 			}
 			else
 			{
-				if (this.x == GameManager.SCREEN_WIDTH - this.width)
+				if (this.position.x == GameManager.SCREEN_WIDTH - this.width)
 				{
 					this.isForcedBack = false;
 				}
 				else
 				{
-					this.velocityX = Math.abs(this.velocityX);
+					this.speed = Math.abs(this.speed);
 				}
 			}
 		}
@@ -101,29 +106,33 @@ public class Paddle extends Actor
 		{
 			if (this.side == ScreenSide.LEFT)
 			{
-				if (this.x <= (GameManager.SCREEN_WIDTH / 100 * PADDLE_OUT_DIST))
+				if (this.position.x <= (GameManager.SCREEN_WIDTH / 100 * PADDLE_OUT_DIST))
 				{
-					this.x += 5;
+					//this.position.x += 5;
 					//this.velocityX = 100;
 					
-					if (this.velocityY != 0)
+					if (this.speed != 0)
 					{
-						prevVelocityY = this.velocityY;
-						this.velocityY = 0;
+						prevSpeedY = this.speed;
+						//this.speed = 0;
+						
+						this.direction = (this.direction == 90) ? 270 : 90;
 					}
 				}
 			}
 			else
 			{
-				if (this.x >= (GameManager.SCREEN_WIDTH / 100 * (100 - PADDLE_OUT_DIST)))
+				if (this.position.x >= (GameManager.SCREEN_WIDTH / 100 * (100 - PADDLE_OUT_DIST)))
 				{
-					this.x -= 5;
+					//this.position.x -= 5;
 					//this.velocityX = -100;
 					
-					if (this.velocityY != 0)
+					if (this.speed != 0)
 					{
-						prevVelocityY = this.velocityY;
-						this.velocityY = 0;
+						prevSpeedY = this.speed;
+						//this.speed = 0;
+						
+						this.direction = (this.direction == 90) ? 270 : 90;
 					}
 				}
 			}
@@ -131,23 +140,23 @@ public class Paddle extends Actor
 		else
 		{
 			// Move back to original X position.
-			if (this.side == ScreenSide.LEFT && this.x > 0)
+			if (this.side == ScreenSide.LEFT && this.position.x > 0)
 			{
-				this.x -= 5;
+				this.position.x -= 5;
 				//this.velocityX = -100;
 				
-				if (this.x <= 0)
+				if (this.position.x <= 0)
 				{
-					this.velocityY = prevVelocityY;
+					this.speed = (float)prevSpeedY;
 				}
 			}
-			else if (this.side == ScreenSide.RIGHT && this.x < (GameManager.SCREEN_WIDTH - this.width))
+			else if (this.side == ScreenSide.RIGHT && this.position.x < (GameManager.SCREEN_WIDTH - this.width))
 			{
-				this.x += 5;
+				this.position.x += 5;
 				
-				if (this.x == (GameManager.SCREEN_WIDTH - this.width))
+				if (this.position.x == (GameManager.SCREEN_WIDTH - this.width))
 				{
-					this.velocityY = prevVelocityY;
+					this.speed = (float)prevSpeedY;
 				}
 			}
 		}

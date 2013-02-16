@@ -2,12 +2,13 @@ package com.example.advancedpong;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Point;
 
 public class Ball extends Actor
 {
-	public Ball(Resources resources, float x, float y, double velocityX, double velocityY)
+	public Ball(Resources resources, Point position, float speed, float angle)
 	{
-		super(resources, R.drawable.ball, x, y, velocityX, velocityY);
+		super(resources, R.drawable.ball, position, speed, angle);
 		
 		GameManager.Game.balls.add(this);
 	}
@@ -21,11 +22,11 @@ public class Ball extends Actor
 	{
 		super.Update(timeElapsed);
 		
-		if (x + this.width < 0)
+		if (this.position.x + this.width < 0)
 		{
 			// TEMP:
-			this.x = 0;
-			this.velocityX *= -1;
+			this.position.x = 0;
+			this.speed *= -1;
 			
 			
 			
@@ -44,11 +45,11 @@ public class Ball extends Actor
 			// Destroy ball.
 			//GameManager.Game.balls.remove(this); //////////////////////////////////////////////////////////
 		}
-		else if (x > GameManager.SCREEN_WIDTH)
+		else if (this.position.x > GameManager.SCREEN_WIDTH)
 		{
 			// TEMP:
-			this.x = GameManager.SCREEN_WIDTH - this.width;
-			this.velocityX *= -1;
+			this.position.x = GameManager.SCREEN_WIDTH - this.width;
+			this.speed *= -1;
 			
 			
 			
@@ -68,15 +69,15 @@ public class Ball extends Actor
 			//GameManager.Game.balls.remove(this); //////////////////////////////////////////////////////////
 		}
 		
-		if (y <= 0)
+		if (this.position.y <= 0)
 		{
-			y = 0;
-			velocityY *= -1;
+			this.position.y = 0;
+			this.speed *= -1;
 		}
-		else if (y + this.height >= GameManager.SCREEN_HEIGHT)
+		else if (this.position.y + this.height >= GameManager.SCREEN_HEIGHT)
 		{
-			y = GameManager.SCREEN_HEIGHT - this.height;
-			velocityY *= -1;
+			this.position.y = GameManager.SCREEN_HEIGHT - this.height;
+			this.speed *= -1;
 		}
 	}
 }

@@ -1,11 +1,15 @@
 package com.example.advancedpong;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -50,11 +54,11 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
             // get handles to some important objects
             mSurfaceHolder = surfaceHolder;
             
-            ball = new Ball(resources, 100, 100, 250, 100);
-        	//ball = new Ball(resources, GameManager.SCREEN_WIDTH - 10, GameManager.SCREEN_HEIGHT - 50, 0, 50);
-            leftPaddle = new Paddle(resources, ScreenSide.LEFT, 0, GameManager.SCREEN_HEIGHT / 2 - 50, 0, 250);
-            rightPaddle = new Paddle(resources, ScreenSide.RIGHT, 0, GameManager.SCREEN_HEIGHT / 2 - 50, 0, -250);
-            rightPaddle.x = GameManager.SCREEN_WIDTH - rightPaddle.width;
+            ball = new Ball(resources, new Point(100, 100), 10, 45);
+        	//ball = new Ball(resources, GameManager.SCREEN_WIDTH - 10, GameManager.SCREEN_HEIGHT - 50, 0, -50);
+            leftPaddle = new Paddle(resources, ScreenSide.LEFT, new Point(0, GameManager.SCREEN_HEIGHT / 2 - 50), 10);
+            rightPaddle = new Paddle(resources, ScreenSide.RIGHT, new Point(0, GameManager.SCREEN_HEIGHT / 2 - 50), 10);
+            rightPaddle.position.x = GameManager.SCREEN_WIDTH - rightPaddle.width;
         }
 
         /**
@@ -81,9 +85,9 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
                     
                     synchronized (mSurfaceHolder)
                     {
-                    	doDraw(c);
                         updatePhysics();
                         checkCollision(c);
+                        doDraw(c);
                     }
                 }
                 finally
@@ -198,6 +202,181 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
         
         private void checkCollision(Canvas canvas)
         {
+        	for (Ball ball : GameManager.Game.balls)
+        	{
+				double distance = GameManager.SCREEN_WIDTH - ball.right();
+        		double time = distance / ball.speed;
+        		
+        		//if (time > 0 && time < 1)
+        		if (time > 0 && time < 0.1)
+        		{
+        	       ball.position.x += ball.speed * time;
+        	       ball.position.y += ball.speed * time;
+        	       
+        	       ball.speed *= -1;
+        	    }
+        	}
+        	
+        	
+        	
+        	
+        	//checkBallToPaddleCollision(canvas);
+        }
+        
+        private void drawLines(Canvas canvas, Line[] lines)
+        {
+	        for (Line line : lines)
+			{
+				drawLine(canvas, line);
+			}
+        }
+        
+        private void drawLine(Canvas canvas, Line line)
+        {
+        	Paint paint = new Paint();
+        	paint.setDither(true);
+        	paint.setColor(Color.RED);
+        	paint.setStyle(Paint.Style.STROKE);    
+        	paint.setStrokeJoin(Paint.Join.ROUND);
+        	paint.setStrokeCap(Paint.Cap.ROUND);
+        	paint.setStrokeWidth(4);
+        	
+        	Path path = new Path();
+			path.moveTo(line.a.x, line.a.y);
+			path.lineTo(line.b.x, line.b.y);
+			canvas.drawPath(path, paint);
+        }
+        
+        private void checkBallToPaddleCollision(Canvas canvas)
+        {
+        	for (Ball ball : GameManager.Game.balls)
+        	{
+        		Line[] ballLines = new Line[4];
+        		ballLines[0] = new Line(new PointF(ball.lastPosition.x, ball.lastPosition.y), new PointF(ball.position.x, ball.position.y)); // TL
+        		ballLines[1] = new Line(new PointF(ball.lastPosition.x + ball.width, ball.lastPosition.y), new PointF(ball.right(), ball.position.y)); // TR
+        		ballLines[2] = new Line(new PointF(ball.lastPosition.x + ball.width, ball.lastPosition.y + ball.height), new PointF(ball.right(), ball.bottom())); // BR
+        		ballLines[3] = new Line(new PointF(ball.lastPosition.x, ball.lastPosition.y + ball.height), new PointF(ball.position.x, ball.bottom())); // BL
+        		
+        		drawLines(canvas, ballLines);
+        		
+        		for (Paddle paddle : GameManager.Game.paddles)
+        		{
+        			Map<String, Line> paddleLines = new HashMap<String, Line>();
+        			paddleLines.put("Top", 		new Line(new PointF(paddle.position.x, paddle.position.y), new PointF(paddle.right(), paddle.position.y)));
+        			paddleLines.put("Right", 	new Line(new PointF(paddle.right(), paddle.position.y), new PointF(paddle.right(), paddle.bottom())));
+        			paddleLines.put("Bottom", 	new Line(new PointF(paddle.right(), paddle.bottom()), new PointF(paddle.position.x, paddle.bottom())));
+        			paddleLines.put("Left", 	new Line(new PointF(paddle.position.x, paddle.bottom()), new PointF(paddle.position.x, paddle.position.y)));
+        			
+        			// Check collisions.
+        			
+        			boolean topHit = false;
+        			boolean rightHit = false;
+        			boolean bottomHit = false;
+        			boolean leftHit = false;
+        			
+        			PointF topIntersect = new PointF(0, 0);
+        			PointF rightIntersect = new PointF(0, 0);
+        			PointF bottomIntersect = new PointF(0, 0);
+        			PointF leftIntersect = new PointF(0, 0);
+        			
+        			for (Map.Entry<String, Line> paddleLine : paddleLines.entrySet())
+        			{
+        				for (Line ballLine : ballLines)
+        				{
+        					PointF intersect = findLineIntersection(
+        						new PointF(ballLine.a.x, ballLine.a.y),
+        						new PointF(ballLine.b.x, ballLine.b.y + 1),
+        						new PointF(paddleLine.getValue().a.x, paddleLine.getValue().a.y),
+        						new PointF(paddleLine.getValue().b.x, paddleLine.getValue().b.y));
+        					
+        					if (intersect.x != 0 && intersect.y != 0)
+        					{
+        						// A collision has occured.
+        						
+        						String side = paddleLine.getKey();
+        						if (side.equals("Top"))
+        						{
+        							topHit = true;
+        							topIntersect = new PointF(intersect.x, intersect.y);
+        						}
+        						else if (side.equals("Right"))
+        						{
+        							rightHit = true;
+        							rightIntersect = new PointF(intersect.x, intersect.y);
+        						}
+        						else if (side.equals("Bottom"))
+        						{
+        							bottomHit = true;
+        							bottomIntersect = new PointF(intersect.x, intersect.y);
+        						}
+        						else if (side.equals("Left"))
+        						{
+        							leftHit = true;
+        							leftIntersect = new PointF(intersect.x, intersect.y);
+        						}
+        					}
+        				}
+        			}
+        			
+        			drawLine(canvas, paddleLines.get("Top"));
+        			
+        			if (topHit)
+        			{
+        				ball.position.x = (int)topIntersect.x;
+        				ball.position.y = (int)topIntersect.y - ball.height;
+        				
+        				ball.speed = -Math.abs(ball.speed);
+        				
+        				// Force paddle to move downwards.
+						paddle.speed = Math.abs(paddle.speed);
+						
+						Log.w("COLLISION HERE", "COLLISION!!!!!!!!!!!!!!");
+        			}
+        			else if (leftHit)
+        			{
+        				
+        			}
+        			else if (rightHit)
+        			{
+        				
+        			}
+        			else if (bottomHit)
+        			{
+        				
+        			}
+        		}
+        	}
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	
+        	/*
+        	// TEMP:
+        	int CORNER_SIZE = 10;
+        	
         	Paint paint = new Paint();
         	paint.setDither(true);
         	paint.setColor(Color.RED);
@@ -205,6 +384,8 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
         	paint.setStrokeJoin(Paint.Join.ROUND);
         	paint.setStrokeCap(Paint.Cap.ROUND);
         	paint.setStrokeWidth(3);
+        	
+        	
         	
         	for (Ball ball : GameManager.Game.balls)
         	{
@@ -245,45 +426,12 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
             		bpath.moveTo(ball.lastX, ball.lastY);
             		bpath.lineTo(ball.x, ball.y);
             		canvas.drawPath(bpath, paint);
-		        	
-		        	int i = 0;
-            		for (Path path : paths)
-            		{
-			        	canvas.drawPath(path, paint);
-			        	
-			        	PointF intersect = findLineIntersection(
-			        		new PointF((float)ball.lastX, (float)ball.lastY),
-			        		new PointF((float)ball.x, (float)ball.y),
-			        		lines[i].a, lines[i].b);
-			        	
-			        	if (intersect.x != 0 && intersect.y != 0)
-			        	{
-			        		Log.d("Intersect", Float.toString(intersect.x) + ", " + Float.toString(intersect.y));
-			        	}
-			        	
-			        	i++;
-            		}
-        		}
-        	}
-        	
-        	
-        	
-        	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        	
-        	
-        	
-        	//checkBallToPaddleCollision(canvas);
-        }
-        
-        private void checkBallToPaddleCollision(Canvas canvas)
-        {
-        	// TEMP:
-        	int CORNER_SIZE = 10;
-        	
-        	for (Ball ball : GameManager.Game.balls)
-        	{
-        		for (Paddle paddle : GameManager.Game.paddles)
-        		{
+            		
+            		
+            		
+            		
+            		
+            		
         			if (paddle.Side() == ScreenSide.LEFT)
         			{
         				//
@@ -345,7 +493,7 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
         						
         						
         						// Set ball y to top of paddle.
-        						ball.y = paddle.bottom();
+        						//ball.y = paddle.bottom();
         						
         						// Force paddle to move downwards.
         						paddle.velocityY = -Math.abs(paddle.velocityY);
@@ -375,20 +523,45 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
         						// Hit LHS.
         						
         						// Set ball x to LHS of paddle.
-        						ball.x = paddle.x - ball.width;
+        						//ball.x = paddle.x - ball.width;
         						
         						if (Math.abs(ball.velocityX) < Math.abs(paddle.velocityX))
         						{
         							ball.velocityX = -Math.abs(paddle.velocityX + 2);
         						}
+        						
+        						
+        						
+        						int i = 0;
+    				        	canvas.drawPath(paths[0], paint);
+    				        	
+    				        	PointF intersect = findLineIntersection(
+    				        		new PointF((float)ball.lastX, (float)ball.lastY),
+    				        		new PointF((float)ball.x, (float)ball.y),
+    				        		lines[i].a, lines[i].b);
+    				        	
+    				        	if (intersect.x != 0 && intersect.y != 0)
+    				        	{
+    			        			
+    				        		
+    			        			Log.d("Intersect", Float.toString(intersect.x) + ", " + Float.toString(intersect.y));
+    				        	}
+    				        	
+    				        	i++;
         					}
         					
         					// Force the paddle back to it's original x position.
         					paddle.forceBack();
         				}
         			}
+		        			
+		        	
+            		
+            		
+            		
         		}
         	}
+        	*/
         }
     }
 
