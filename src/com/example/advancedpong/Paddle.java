@@ -10,11 +10,28 @@ public class Paddle extends Actor
 	
 	private final int PADDLE_OUT_DIST = 40; // Percentage.
 	
-	private boolean isForcedBack;
-	private boolean isPressed;
-	private ScreenSide side;
+	private enum Direction
+	{
+		UP(270),
+		RIGHT(0),
+		DOWN(90),
+		LEFT(180);
+		
+		private float value;
+		
+		private Direction(float value)
+		{
+		  this.value = value;
+		}
+		
+		public float getValue()
+		{
+		  return value;
+		}
+	}
 	
-	double prevSpeedY;
+	private boolean isForcedBack, isPressed;
+	private ScreenSide side;
 
 	public boolean getIsPressed()
 	{
@@ -41,6 +58,33 @@ public class Paddle extends Actor
 		this.isForcedBack = true;
 	}
 	
+	private void reverseX()
+	{
+		this.vx *= -1;
+	}
+	
+	private void reverseY()
+	{
+		this.vy *= -1;
+	}
+	
+	private void moveInDirection(Direction direction)
+	{
+		this.direction = direction.value;
+		double radians = (Math.toRadians(this.direction));
+		
+		if (direction == Direction.LEFT || direction == Direction.RIGHT)
+		{
+			this.vx = this.speed * Math.cos(radians);
+			this.vy = 0;
+		}
+		else
+		{
+			this.vx = 0;
+			this.vy = this.speed * Math.sin(radians);
+		}
+	}
+	
 	public Paddle(Resources resources, ScreenSide side, Point position, float speed)
 	{
 		super(resources, R.drawable.paddle, position, speed, 90);
@@ -59,106 +103,93 @@ public class Paddle extends Actor
 	{
 		super.Update(timeElapsed);
 		
-		if (this.position.x <= 0)
+		// Reverse Y
+		if (this.position.y <= 0)
 		{
 			this.position.y = 0;
-			//this.speed *= -1;
-			
-			this.direction = (this.direction == 90) ? 270 : 90;
+			reverseY();
 		}
 		else if ((this.position.y + this.height) >= GameManager.SCREEN_HEIGHT)
 		{
 			this.position.y = GameManager.SCREEN_HEIGHT - this.height;
-			//this.speed *= -1;
-			
-			this.direction = (this.direction == 90) ? 270 : 90;
+			reverseY();
 		}
 		
-		// Move X
+		// Force back if necessary
 		if (this.isForcedBack)
 		{
-			// Force backwards to start x point.
 			if (this.side == ScreenSide.LEFT)
 			{
-				if (this.position.x == 0)
+				if (this.position.x <= 0)
 				{
 					this.isForcedBack = false;
+					moveInDirection(Direction.DOWN);
 				}
 				else
 				{
-					this.speed = -Math.abs(this.speed);
+					moveInDirection(Direction.LEFT);
 				}
 			}
 			else
 			{
-				if (this.position.x == GameManager.SCREEN_WIDTH - this.width)
+				if (this.position.x >= GameManager.SCREEN_WIDTH - this.width)
 				{
 					this.isForcedBack = false;
+					moveInDirection(Direction.DOWN); /////////////////////
 				}
 				else
 				{
-					this.speed = Math.abs(this.speed);
+					moveInDirection(Direction.RIGHT);
 				}
 			}
 		}
 		
+		// Move towards middle
 		if (this.isPressed && !this.isForcedBack)
 		{
 			if (this.side == ScreenSide.LEFT)
 			{
-				if (this.position.x <= (GameManager.SCREEN_WIDTH / 100 * PADDLE_OUT_DIST))
-				{
-					//this.position.x += 5;
-					//this.velocityX = 100;
-					
-					if (this.speed != 0)
-					{
-						prevSpeedY = this.speed;
-						//this.speed = 0;
-						
-						this.direction = (this.direction == 90) ? 270 : 90;
-					}
-				}
+				moveInDirection(Direction.RIGHT);
 			}
 			else
 			{
-				if (this.position.x >= (GameManager.SCREEN_WIDTH / 100 * (100 - PADDLE_OUT_DIST)))
-				{
-					//this.position.x -= 5;
-					//this.velocityX = -100;
-					
-					if (this.speed != 0)
-					{
-						prevSpeedY = this.speed;
-						//this.speed = 0;
-						
-						this.direction = (this.direction == 90) ? 270 : 90;
-					}
-				}
+				moveInDirection(Direction.LEFT);
 			}
 		}
-		else
+		
+		// Move back if necessary
+		if (!this.isPressed)
 		{
-			// Move back to original X position.
-			if (this.side == ScreenSide.LEFT && this.position.x > 0)
+			if (this.side == ScreenSide.LEFT)
 			{
-				this.position.x -= 5;
-				//this.velocityX = -100;
-				
-				if (this.position.x <= 0)
+				if (this.position.x > 0)
 				{
-					this.speed = (float)prevSpeedY;
+					moveInDirection(Direction.LEFT);
+				}
+				else if (this.direction != Direction.DOWN.value &&
+						 this.direction != Direction.UP.value)
+				{
+					moveInDirection(Direction.DOWN); /////////////////////
 				}
 			}
-			else if (this.side == ScreenSide.RIGHT && this.position.x < (GameManager.SCREEN_WIDTH - this.width))
+			
+			if (this.side == ScreenSide.RIGHT)
 			{
-				this.position.x += 5;
-				
-				if (this.position.x == (GameManager.SCREEN_WIDTH - this.width))
+				if (this.position.x < GameManager.SCREEN_WIDTH - this.width)
 				{
-					this.speed = (float)prevSpeedY;
+					moveInDirection(Direction.RIGHT);
+				}
+				else if (this.direction != Direction.DOWN.value &&
+						 this.direction != Direction.UP.value)
+				{
+					moveInDirection(Direction.DOWN); /////////////////////
 				}
 			}
 		}
+		
+		
+		
+		this.position.x += this.vx;
+		this.position.y += this.vy;
 	}
 }

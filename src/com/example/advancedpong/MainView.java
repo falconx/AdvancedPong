@@ -54,10 +54,9 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
             // get handles to some important objects
             mSurfaceHolder = surfaceHolder;
             
-            ball = new Ball(resources, new Point(100, 100), 10, 45);
-        	//ball = new Ball(resources, GameManager.SCREEN_WIDTH - 10, GameManager.SCREEN_HEIGHT - 50, 0, -50);
+            ball = new Ball(resources, new Point(GameManager.SCREEN_WIDTH - 10, 10), 10, 90);
             leftPaddle = new Paddle(resources, ScreenSide.LEFT, new Point(0, GameManager.SCREEN_HEIGHT / 2 - 50), 10);
-            rightPaddle = new Paddle(resources, ScreenSide.RIGHT, new Point(0, GameManager.SCREEN_HEIGHT / 2 - 50), 10);
+            rightPaddle = new Paddle(resources, ScreenSide.RIGHT, new Point(0, GameManager.SCREEN_HEIGHT / 2 - 50), 0);
             rightPaddle.position.x = GameManager.SCREEN_WIDTH - rightPaddle.width;
         }
 
@@ -204,17 +203,16 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
         {
         	for (Ball ball : GameManager.Game.balls)
         	{
-				double distance = GameManager.SCREEN_WIDTH - ball.right();
-        		double time = distance / ball.speed;
-        		
-        		//if (time > 0 && time < 1)
-        		if (time > 0 && time < 0.1)
+        		for (Paddle paddle : GameManager.Game.paddles)
         		{
-        	       ball.position.x += ball.speed * time;
-        	       ball.position.y += ball.speed * time;
-        	       
-        	       ball.speed *= -1;
-        	    }
+					double distance = Math.abs(ball.bottom() - paddle.position.y);
+	        		double time = distance / ball.speed;
+	        		
+	        		if (time > 0 && time < 1)
+	        		{
+	        			ball.vy *= -1;
+	        	    }
+        		}
         	}
         	
         	

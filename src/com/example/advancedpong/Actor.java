@@ -9,11 +9,11 @@ import android.graphics.Point;
 
 public class Actor extends Activity
 {
-	protected Point position;
-	protected Point lastPosition;
+	protected Point position, lastPosition;
+	protected int height, width;
 	protected float speed;
-	protected int height;
-	protected int width;
+	protected float direction = 270;
+	protected double vx, vy;
 	protected Bitmap bitmap;
 	
 	public float getX()
@@ -91,16 +91,18 @@ public class Actor extends Activity
 		return (int) this.position.y + this.height;
 	}
 	
-	public float angle; /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	public Actor(Resources resources, int resourceID, Point position, float speed, float angle)
+	public Actor(Resources resources, int resourceID, Point position, float speed, float direction)
 	{
 		this.position = position;
 		this.speed = speed;
-		this.angle = angle;
+		this.direction = direction;
 		this.bitmap = BitmapFactory.decodeResource(resources, resourceID);
 		this.height = bitmap.getHeight();
 		this.width = bitmap.getWidth();
+		
+		double radians = (Math.toRadians(this.direction));
+		this.vx = this.speed * Math.cos(radians);
+		this.vy = this.speed * Math.sin(radians);
 	}
 	
 	protected void Draw(Canvas canvas)
@@ -108,17 +110,8 @@ public class Actor extends Activity
 		canvas.drawBitmap(this.bitmap, this.position.x, this.position.y, null);
 	}
 	
-	public float direction = 270;
-	
 	protected void Update(double timeElapsed)
 	{
 		this.lastPosition = this.position;
-		
-		double radians = (Math.PI / 180) * this.angle;
-		this.position.x += this.speed * Math.cos(radians);
-		this.position.y += this.speed * Math.sin(radians);
-		
-		//this.x += timeElapsed * this.speedX;
-		//this.y += timeElapsed * this.speedY;
 	}
 }
