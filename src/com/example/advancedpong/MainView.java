@@ -54,10 +54,14 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
             // get handles to some important objects
             mSurfaceHolder = surfaceHolder;
             
-            ball = new Ball(resources, new Point(GameManager.SCREEN_WIDTH / 2, GameManager.SCREEN_HEIGHT / 2), 5, 135);
+            //ball = new Ball(resources, new Point(GameManager.SCREEN_WIDTH / 2, GameManager.SCREEN_HEIGHT / 2), 60, 180);
+            //ball = new Ball(resources, new Point(GameManager.SCREEN_WIDTH - 10, 10), 21, 135);
+            ball = new Ball(resources, new Point(GameManager.SCREEN_WIDTH / 2, GameManager.SCREEN_HEIGHT / 2), 21, 135);
             leftPaddle = new Paddle(resources, ScreenSide.LEFT, new Point(0, GameManager.SCREEN_HEIGHT / 2 - 50), 10);
-            rightPaddle = new Paddle(resources, ScreenSide.RIGHT, new Point(0, GameManager.SCREEN_HEIGHT / 2 - 50), 10);
+            rightPaddle = new Paddle(resources, ScreenSide.RIGHT, new Point(GameManager.SCREEN_WIDTH / 2, GameManager.SCREEN_HEIGHT / 2 - 50), 10);
             rightPaddle.position.x = GameManager.SCREEN_WIDTH - rightPaddle.width;
+            
+            //rightPaddle.forceBack();
             
             //Ball ball2 = new Ball(resources, new Point(10, GameManager.SCREEN_HEIGHT - 20), 4, 270);
             //Ball ball3 = new Ball(resources, new Point(GameManager.SCREEN_WIDTH / 2, GameManager.SCREEN_HEIGHT / 2), 80, 180);
@@ -194,12 +198,12 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
 					distance = Math.abs(ball.bottom() - paddle.top());
 	        		time = distance / ball.speed;
 	        		
-	        		if (time >= 0 && time <= 1.5)
+	        		if (time >= 0 && time <= 2 && !c)
 	        		{
 	        			//TODO: Push ball away, opposite direction to paddle
 	        			ball.vy *= -1;
 	        			paddle.vy *= -1;
-	        			c = true;
+	        			ball.speed += 2;
 	        	    }
     			}
     			
@@ -210,12 +214,12 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
 					distance = Math.abs(ball.top() - paddle.bottom());
 	        		time = distance / ball.speed;
 	        		
-	        		if (time >= 0 && time <= 1.5)
+	        		if (time >= 0 && time <= 1.5 && !c)
 	        		{
 	        			//TODO: Push ball away, opposite direction to paddle
 	        			ball.vy *= -1;
 	        			paddle.vy *= -1;
-	        			c = true;
+	        			ball.speed += 2;
 	        	    }
     			}
     			
@@ -226,14 +230,27 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
     			{
 					distance = Math.abs(ball.right() - paddle.left());
 	        		time = distance / ball.speed;
+	        		Log.e("speed", Double.toString(ball.speed));
+	        		//Log.e("Distance", Double.toString(distance));
 	        		
-	        		if (time >= 0 && time <= 1.5)
+	        		if (time >= 0 && time <= 1.5 && !c)
 	        		{
+	        			//Log.e("Collision", "Collision");
+	        			if (paddle.Side() == ScreenSide.LEFT)
+	        			{
+	        				ball.speed = paddle.speed * 1.5f;
+	        			}
+	        			else
+	        			{
+	        				c = true;
+	        			}
+	        			
 	        			//TODO: Push ball away, opposite direction to paddle
 	        			ball.vx *= -1;
 	        			paddle.vy *= -1;
-	        			c = true;
+	        			ball.speed += 2;
 	        	    }
+	        		//Log.e("-----------------------", "------------------------------");
     			}
     			
     			// Paddle right collision
@@ -244,18 +261,25 @@ class MainView extends SurfaceView implements SurfaceHolder.Callback
 					distance = Math.abs(ball.left() - paddle.right());
 	        		time = distance / ball.speed;
 	        		
-	        		if (time >= 0 && time <= 1.5)
+	        		if (time >= 0 && time <= 1.5 && !c)
 	        		{
+	        			if (paddle.Side() == ScreenSide.RIGHT)
+	        			{
+	        				ball.speed = paddle.speed * 1.5f;
+	        			}
+	        			else
+	        			{
+	        				c = true;
+	        			}
+	        			
 	        			//TODO: Push ball away, opposite direction to paddle
 	        			ball.vx *= -1;
 	        			paddle.vy *= -1;
-	        			c = true;
+	        			ball.speed += 2;
 	        	    }
     			}
     			
     			if (c) {
-    				paddle.position = paddle.lastPosition;
-    				ball.position = ball.lastPosition;
     				paddle.forceBack();
     			}
         	}

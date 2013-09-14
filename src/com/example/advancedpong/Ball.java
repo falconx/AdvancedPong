@@ -74,9 +74,6 @@ public class Ball extends Actor
 			this.position.y = GameManager.SCREEN_HEIGHT - this.height;
 			this.vy = -Math.abs(this.vy);
 		}
-		
-		
-		
 			
 		this.position.x += this.vx;
 		this.position.y += this.vy;
