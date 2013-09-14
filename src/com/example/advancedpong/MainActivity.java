@@ -10,6 +10,7 @@ import android.text.Layout;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -32,6 +33,9 @@ public class MainActivity extends Activity
 
         // tell system to use the layout defined in our XML file
         setContentView(R.layout.activity_main);
+        
+        // hide title bar
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // get handles to the LunarView from XML, and its LunarThread
         mMainView = (MainView) findViewById(R.id.main);

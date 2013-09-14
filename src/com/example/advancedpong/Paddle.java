@@ -83,6 +83,25 @@ public class Paddle extends Actor
 			this.vx = 0;
 			this.vy = this.speed * Math.sin(radians);
 		}
+		
+		// Apply PADDLE_OUT_DIST constraint
+		double limit = (GameManager.SCREEN_WIDTH / 100) * PADDLE_OUT_DIST;
+		
+		if (this.side == ScreenSide.LEFT)
+		{
+			if (this.right() >= limit)
+			{
+				this.position.x = (int)limit - this.width;
+			}
+		}
+		else
+		{
+			limit = GameManager.SCREEN_WIDTH - limit;
+			if (this.left() <= limit)
+			{
+				this.position.x = (int)limit;
+			}
+		}
 	}
 	
 	public Paddle(Resources resources, ScreenSide side, Point position, float speed)
